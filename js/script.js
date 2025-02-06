@@ -44,7 +44,8 @@ document.addEventListener('DOMContentLoaded', function() {
         'specials-btn': 'specials-modal',
         'host-favorites': 'host-favorites-modal',
         'gallery-card': 'gallery-modal',
-        'amenities-card': 'amenities-modal'
+        'amenities-card': 'amenities-modal',
+        'live-tour-btn': 'live-tour-modal'
     };
 
     // Add click handlers for all buttons
@@ -279,4 +280,55 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('rooms-card').addEventListener('click', () => {
         setTimeout(initializeRoomGalleries, 100);
     });
+
+    // Live Tour Form Handler
+    const liveTourForm = document.getElementById('liveTourForm');
+    if (liveTourForm) {
+        liveTourForm.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            
+            // Get form data
+            const guestName = document.getElementById('guestName').value;
+            const guestPhone = document.getElementById('guestPhone').value;
+            
+            // Close the modal
+            closeModal('live-tour-modal');
+            
+            // Reset form
+            liveTourForm.reset();
+            
+            // Show success message
+            const successMessage = document.createElement('div');
+            successMessage.className = 'success-message';
+            successMessage.innerHTML = `
+                <div class="success-content">
+                    <i class="fas fa-check-circle"></i>
+                    <h3>Request Received!</h3>
+                    <p>Thank you for your interest. Our caretaker will contact you shortly for a live video tour.</p>
+                </div>
+            `;
+            document.body.appendChild(successMessage);
+            
+            // Remove success message after 5 seconds
+            setTimeout(() => {
+                successMessage.remove();
+            }, 5000);
+
+            // Send WhatsApp message to caretaker (replace CARETAKER_NUMBER with actual number)
+            const caretakerNumber = "918999915037"; // Format: country code without + (e.g., "918999915037")
+            const message = encodeURIComponent(
+                `New Live Tour Request:\n\nGuest Name: ${guestName}\nPhone: ${guestPhone}\n\nPlease contact the guest to schedule a video tour.`
+            );
+            
+            // Send WhatsApp message silently using the WhatsApp API
+            const whatsappLink = `https://api.whatsapp.com/send?phone=${caretakerNumber}&text=${message}`;
+            
+            try {
+                // Use fetch to silently send the WhatsApp message
+                await fetch(whatsappLink, { mode: 'no-cors' });
+            } catch (error) {
+                console.error('Error sending WhatsApp message:', error);
+            }
+        });
+    }
 }); 
